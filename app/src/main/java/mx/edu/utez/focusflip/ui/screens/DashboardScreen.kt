@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -51,7 +50,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -92,13 +90,11 @@ fun DashboardScreen(
         mutableStateOf(prefs.dailyGoalMinutes.toString())
     }
 
-    // Escuchar sensores reales como en AcelerometroTest
     DisposableEffect(Unit) {
         sensorViewModel.startListening(context)
         onDispose { }
     }
 
-    // Si el usuario coloca el teléfono físicamente boca abajo en la mesa, inicia el modo OLED automáticamente
     LaunchedEffect(sensorData.isFaceDownHardware) {
         if (sensorData.isFaceDownHardware) {
             focusViewModel.startFocusTimer()
@@ -111,7 +107,7 @@ fun DashboardScreen(
             onDismissRequest = { showEditGoalDialog = false },
             containerColor = Slate900,
             title = {
-                Text("Editar Meta del Día (CRUD)", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Editar Meta del Día", color = Color.White, fontWeight = FontWeight.Bold)
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -154,7 +150,7 @@ fun DashboardScreen(
             .background(Slate950)
             .verticalScroll(rememberScrollState())
             .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Barra superior de perfil
         Row(
@@ -201,7 +197,7 @@ fun DashboardScreen(
                                 .background(NeonEmerald)
                         )
                         Text(
-                            text = "Sensores Listos • ${"%.0f".format(sensorData.lux)} lx",
+                            text = "Sensor Listo",
                             color = NeonEmerald,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium
@@ -283,7 +279,7 @@ fun DashboardScreen(
             }
         }
 
-        // Tarjeta Principal de Activación por Giroscopio / Inclinación / Proximidad / Luz
+        // Tarjeta Principal de Activación por Giroscopio / Inclinación
         GlassCard(
             modifier = Modifier.fillMaxWidth(),
             borderColor = NeonEmerald.copy(alpha = 0.4f),
@@ -296,7 +292,7 @@ fun DashboardScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
@@ -336,7 +332,7 @@ fun DashboardScreen(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "El giroscopio, proximidad y sensor de luz ambiental iniciarán el contador automáticamente al detectar la inclinación sobre la mesa.",
+                    text = "El contador iniciará automáticamente al detectar que colocaste tu teléfono sobre la mesa.",
                     color = Slate400,
                     fontSize = 11.sp,
                     lineHeight = 16.sp,
@@ -358,51 +354,6 @@ fun DashboardScreen(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
                     )
                 }
-            }
-        }
-
-        // Telemetría en Vivo de los 3 Sensores (Giroscopio/Inclinación + Proximidad + Luz Ambiental)
-        GlassCard(
-            modifier = Modifier.fillMaxWidth(),
-            borderColor = Slate800
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.LightMode,
-                        contentDescription = null,
-                        tint = NeonBlue,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "Lectura de Sensores en Tiempo Real",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Text(
-                    text = sensorData.lightEnvironmentLabel,
-                    color = NeonEmerald,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                SensorMiniStat("Inclinación Z", "${"%.1f".format(sensorData.accelZ)} m/s²")
-                SensorMiniStat("Proximidad", if (sensorData.isProximityNear) "Mesa (0 cm)" else "${"%.1f".format(sensorData.proximityCm)} cm")
-                SensorMiniStat("Luz Ambiental", "${"%.1f".format(sensorData.lux)} lx")
             }
         }
 
@@ -441,7 +392,7 @@ fun DashboardScreen(
             }
         }
 
-        // Tarjeta de Meta del Día (CRUD: Editar metas del día)
+        // Tarjeta de Meta del Día
         GlassCard(
             modifier = Modifier.fillMaxWidth(),
             borderColor = NeonPurple.copy(alpha = 0.4f)
@@ -505,19 +456,5 @@ fun DashboardScreen(
                 trackColor = Slate800
             )
         }
-    }
-}
-
-@Composable
-private fun SensorMiniStat(label: String, value: String) {
-    Column {
-        Text(text = label, color = Slate400, fontSize = 10.sp)
-        Text(
-            text = value,
-            color = Slate200,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace
-        )
     }
 }

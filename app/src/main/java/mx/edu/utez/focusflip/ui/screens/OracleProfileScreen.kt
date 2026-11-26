@@ -21,20 +21,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CloudSync
-import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,12 +40,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mx.edu.utez.focusflip.ui.components.GlassCard
 import mx.edu.utez.focusflip.ui.theme.NeonBlue
 import mx.edu.utez.focusflip.ui.theme.NeonEmerald
-import mx.edu.utez.focusflip.ui.theme.NeonEmeraldDark
 import mx.edu.utez.focusflip.ui.theme.OracleRed
 import mx.edu.utez.focusflip.ui.theme.Slate200
 import mx.edu.utez.focusflip.ui.theme.Slate400
 import mx.edu.utez.focusflip.ui.theme.Slate800
-import mx.edu.utez.focusflip.ui.theme.Slate900
 import mx.edu.utez.focusflip.ui.theme.Slate950
 import mx.edu.utez.focusflip.ui.viewmodels.AuthViewModel
 import mx.edu.utez.focusflip.ui.viewmodels.FocusViewModel
@@ -66,13 +56,8 @@ fun OracleProfileScreen(
     onLoggedOut: () -> Unit
 ) {
     val prefs by focusViewModel.userPrefs.collectAsStateWithLifecycle()
-    val focusState by focusViewModel.uiState.collectAsStateWithLifecycle()
     val totalMinutes by focusViewModel.totalMinutesFlow.collectAsStateWithLifecycle()
     val sessions by focusViewModel.sessions.collectAsStateWithLifecycle()
-
-    var apiUrlInput by remember(prefs.oracleBaseUrl) {
-        mutableStateOf(prefs.oracleBaseUrl)
-    }
 
     val hours = totalMinutes / 60
     val remMins = totalMinutes % 60
@@ -85,7 +70,7 @@ fun OracleProfileScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
             // Encabezado
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -103,22 +88,24 @@ fun OracleProfileScreen(
                         .padding(4.dp)
                 )
                 Text(
-                    text = "Perfil de Estudiante",
+                    text = "Mi Perfil",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
+                    fontSize = 16.sp
                 )
                 Spacer(modifier = Modifier.width(24.dp))
             }
 
             // Avatar y Nombre
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .size(72.dp)
+                        .size(76.dp)
                         .clip(CircleShape)
                         .background(Brush.linearGradient(listOf(NeonEmerald, NeonBlue)))
                         .border(2.dp, NeonEmerald, CircleShape),
@@ -131,76 +118,21 @@ fun OracleProfileScreen(
                         fontSize = 24.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = prefs.nombreCompleto.ifBlank { "Estudiante UTEZ" },
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 17.sp
                 )
                 Text(
                     text = "4°A - Desarrollo de Software Multiplataforma",
                     color = Slate400,
-                    fontSize = 11.sp
+                    fontSize = 12.sp
                 )
             }
 
-            // Tarjeta Base de Datos Local Room + API REST
-            Surface(
-                color = NeonEmeraldDark.copy(alpha = 0.35f),
-                shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, NeonEmerald.copy(alpha = 0.35f)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Storage,
-                            contentDescription = "Base de Datos",
-                            tint = NeonEmerald,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Column {
-                            Text(
-                                text = "Persistencia Room + API REST",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp
-                            )
-                            Text(
-                                text = "SQLite Local + Retrofit 2",
-                                color = Slate400,
-                                fontSize = 10.sp
-                            )
-                        }
-                    }
-
-                    Surface(
-                        color = NeonEmerald.copy(alpha = 0.14f),
-                        shape = RoundedCornerShape(50),
-                        border = BorderStroke(1.dp, NeonEmerald.copy(alpha = 0.35f))
-                    ) {
-                        Text(
-                            text = "Activo",
-                            color = NeonEmerald,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-            }
-
-            // Estadísticas de sesión
+            // Resumen del Estudiante
             GlassCard(
                 modifier = Modifier.fillMaxWidth(),
                 borderColor = Slate800
@@ -209,67 +141,7 @@ fun OracleProfileScreen(
                 ProfileStatRow("Matrícula:", prefs.matricula, isMono = true)
                 ProfileStatRow("Total Enfoque:", "$hours hrs $remMins min", highlight = true)
                 ProfileStatRow("Meta Diaria:", "${prefs.dailyGoalMinutes} min/día")
-                ProfileStatRow("Sesiones Guardadas:", "${sessions.size} registros en Bitácora")
-            }
-
-            // Configuración de Endpoint API REST (Retrofit)
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                borderColor = Slate800
-            ) {
-                Text(
-                    text = "Servidor API REST (Retrofit Base URL)",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
-                    value = apiUrlInput,
-                    onValueChange = { apiUrlInput = it },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Slate900,
-                        unfocusedContainerColor = Slate900,
-                        focusedBorderColor = NeonEmerald,
-                        unfocusedBorderColor = Slate800,
-                        focusedTextColor = Slate200,
-                        unfocusedTextColor = Slate200
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { focusViewModel.updateOracleUrlAndSync(apiUrlInput) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = NeonBlue,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CloudSync,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = if (focusState.isSyncing) "Sincronizando..." else "Sincronizar con API REST",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = focusState.cloudStatusMessage,
-                    color = NeonEmerald,
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace
-                )
+                ProfileStatRow("Sesiones Guardadas:", "${sessions.size} sesiones")
             }
         }
 
@@ -282,7 +154,7 @@ fun OracleProfileScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(46.dp),
+                .height(48.dp),
             shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = OracleRed.copy(alpha = 0.2f),
@@ -309,14 +181,14 @@ private fun ProfileStatRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, color = Slate400, fontSize = 12.sp)
+        Text(text = label, color = Slate400, fontSize = 13.sp)
         Text(
             text = value,
             color = if (highlight) NeonEmerald else Slate200,
-            fontSize = 12.sp,
+            fontSize = 13.sp,
             fontWeight = if (highlight) FontWeight.Bold else FontWeight.Medium,
             fontFamily = if (isMono) FontFamily.Monospace else FontFamily.Default
         )

@@ -105,7 +105,7 @@ fun PauseAlertScreen(
             )
 
             Text(
-                text = "El giroscopio y el sensor de luz ambiental (${"%.1f".format(sensorData.lux)} lx) detectaron que levantaste el teléfono. Vuelve a colocarlo boca abajo para continuar.",
+                text = "El giroscopio detectó que levantaste el teléfono. Vuelve a colocarlo boca abajo para continuar.",
                 color = Slate300,
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center,

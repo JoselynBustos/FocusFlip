@@ -50,7 +50,6 @@ import mx.edu.utez.focusflip.ui.components.GlassCard
 import mx.edu.utez.focusflip.ui.theme.NeonBlue
 import mx.edu.utez.focusflip.ui.theme.NeonEmerald
 import mx.edu.utez.focusflip.ui.theme.Slate200
-import mx.edu.utez.focusflip.ui.theme.Slate300
 import mx.edu.utez.focusflip.ui.theme.Slate400
 import mx.edu.utez.focusflip.ui.theme.Slate800
 import mx.edu.utez.focusflip.ui.theme.Slate900
@@ -66,7 +65,6 @@ fun SensorSettingsScreen(
 ) {
     val context = LocalContext.current
     val prefs by focusViewModel.userPrefs.collectAsStateWithLifecycle()
-    val sensorData by sensorViewModel.sensorData.collectAsStateWithLifecycle()
 
     var sensitivity by remember(prefs.gyroSensitivity) {
         mutableFloatStateOf(prefs.gyroSensitivity)
@@ -124,40 +122,6 @@ fun SensorSettingsScreen(
                 fontSize = 15.sp
             )
             Spacer(modifier = Modifier.width(40.dp))
-        }
-
-        // Monitor en Vivo de Sensores (Acelerómetro/Giroscopio + Proximidad + Luz Ambiental)
-        GlassCard(
-            modifier = Modifier.fillMaxWidth(),
-            borderColor = NeonEmerald.copy(alpha = 0.4f)
-        ) {
-            Text(
-                text = "Monitor de Hardware en Tiempo Real",
-                color = NeonEmerald,
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            SensorDetailRow(
-                title = "Giroscopio / Inclinación (X, Y, Z)",
-                value = "Z: ${"%.2f".format(sensorData.accelZ)} m/s² (${sensorData.inclinationDegrees}°)"
-            )
-            SensorDetailRow(
-                title = "Velocidad Angular Giroscopio",
-                value = "${"%.2f".format(sensorData.gyroX)}, ${"%.2f".format(sensorData.gyroY)}, ${"%.2f".format(sensorData.gyroZ)} rad/s"
-            )
-            SensorDetailRow(
-                title = "Sensor de Proximidad",
-                value = if (sensorData.isProximityNear) "Cerca / Mesa (0.0 cm)" else "${"%.1f".format(sensorData.proximityCm)} cm (Despejado)"
-            )
-            SensorDetailRow(
-                title = "Sensor de Luz Ambiental",
-                value = "${"%.2f".format(sensorData.lux)} lx • ${sensorData.lightEnvironmentLabel}"
-            )
-            SensorDetailRow(
-                title = "Estado Boca Abajo Detectado",
-                value = if (sensorData.isEffectiveFaceDown) "ACTIVO (Enfoque OLED)" else "En espera (Pantalla Arriba)"
-            )
         }
 
         // Control 1: Sensibilidad Giroscopio
@@ -218,7 +182,7 @@ fun SensorSettingsScreen(
                         fontSize = 13.sp
                     )
                     Text(
-                        text = "Detectar mesa y activar pantalla OLED al estar boca abajo",
+                        text = "Activar pantalla OLED al colocar el teléfono boca abajo",
                         color = Slate400,
                         fontSize = 11.sp
                     )
@@ -250,13 +214,13 @@ fun SensorSettingsScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Sensor de Luz Ambiental (Lux)",
+                        text = "Sensor de Luz Ambiental",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
                     )
                     Text(
-                        text = "Medir iluminación de estudio y confirmar bloqueo por oscuridad (< 15 lx)",
+                        text = "Detectar oscuridad sobre la mesa para iniciar el enfoque",
                         color = Slate400,
                         fontSize = 11.sp
                     )
@@ -276,7 +240,7 @@ fun SensorSettingsScreen(
             }
         }
 
-        // Control 4: Alertas sonoras MediaPlayer (como en AcelerometroTest)
+        // Control 4: Sonido al Voltear / Pausar
         GlassCard(
             modifier = Modifier.fillMaxWidth(),
             borderColor = Slate800
@@ -294,7 +258,7 @@ fun SensorSettingsScreen(
                         fontSize = 13.sp
                     )
                     Text(
-                        text = "Reproducir alerta de enfoque (noche.ogg / manana.ogg)",
+                        text = "Reproducir alerta sonora al iniciar o pausar sesión",
                         color = Slate400,
                         fontSize = 11.sp
                     )
@@ -335,7 +299,7 @@ fun SensorSettingsScreen(
             onClick = {
                 sensorViewModel.calibrateSensors()
                 sensorViewModel.playSound(context, R.raw.laser)
-                calibratedMessage = "✓ Giroscopio, Proximidad y Sensor de Luz (${"%.1f".format(sensorData.lux)} lx) calibrados correctamente."
+                calibratedMessage = "✓ Sensores calibrados correctamente."
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -355,29 +319,10 @@ fun SensorSettingsScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Calibrar Sensores Ahora",
+                text = "Calibrar Sensor Ahora",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp
             )
         }
-    }
-}
-
-@Composable
-private fun SensorDetailRow(title: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 3.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = title, color = Slate400, fontSize = 11.sp)
-        Text(
-            text = value,
-            color = Slate300,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace
-        )
     }
 }

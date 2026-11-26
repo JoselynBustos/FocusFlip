@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,12 +29,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mx.edu.utez.focusflip.ui.theme.NeonBlue
-import mx.edu.utez.focusflip.ui.theme.NeonEmerald
 import mx.edu.utez.focusflip.ui.theme.Slate200
 import mx.edu.utez.focusflip.ui.theme.Slate300
 import mx.edu.utez.focusflip.ui.theme.Slate400
@@ -52,24 +49,16 @@ fun EditSessionScreen(
 ) {
     val focusState by focusViewModel.uiState.collectAsStateWithLifecycle()
     val sessions by focusViewModel.sessions.collectAsStateWithLifecycle()
-    val prefs by focusViewModel.userPrefs.collectAsStateWithLifecycle()
 
     val targetSession = focusState.activeSessionToEdit ?: sessions.firstOrNull()
 
-    var asignatura by remember(targetSession) {
-        mutableStateOf(targetSession?.asignatura ?: "Desarrollo de Aplicaciones Móviles")
-    }
-    var duracionStr by remember(targetSession) {
-        mutableStateOf((targetSession?.duracionMinutos ?: 30).toString())
-    }
+    val asignaturaFija = targetSession?.asignatura ?: "Desarrollo de Apps Móviles"
+    val duracionFija = targetSession?.duracionMinutos ?: 25
     var notas by remember(targetSession) {
         mutableStateOf(
             targetSession?.notas
                 ?: "Avance en actividades del proyecto y repaso de la materia."
         )
-    }
-    var metaDiariaStr by remember(prefs.dailyGoalMinutes) {
-        mutableStateOf(prefs.dailyGoalMinutes.toString())
     }
 
     Column(
@@ -97,10 +86,10 @@ fun EditSessionScreen(
                         .padding(6.dp)
                 )
                 Text(
-                    text = "Editar Registro (UPDATE)",
+                    text = "Editar Notas de Sesión",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
+                    fontSize = 15.sp
                 )
                 Spacer(modifier = Modifier.width(40.dp))
             }
@@ -115,17 +104,15 @@ fun EditSessionScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
-                        value = asignatura,
-                        onValueChange = { asignatura = it },
+                        value = asignaturaFija,
+                        onValueChange = { },
+                        enabled = false,
                         singleLine = true,
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Slate900,
-                            unfocusedContainerColor = Slate900,
-                            focusedBorderColor = NeonBlue,
-                            unfocusedBorderColor = Slate800,
-                            focusedTextColor = Slate200,
-                            unfocusedTextColor = Slate200
+                            disabledContainerColor = Slate900.copy(alpha = 0.6f),
+                            disabledBorderColor = Slate800,
+                            disabledTextColor = Slate400
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -133,25 +120,22 @@ fun EditSessionScreen(
 
                 Column {
                     Text(
-                        text = "Ajustar Minutos de la Sesión",
+                        text = "Duración Registrada (No editable)",
                         color = Slate300,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
-                        value = duracionStr,
-                        onValueChange = { duracionStr = it.filter { ch -> ch.isDigit() } },
+                        value = "$duracionFija minutos",
+                        onValueChange = { },
+                        enabled = false,
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Slate900,
-                            unfocusedContainerColor = Slate900,
-                            focusedBorderColor = NeonBlue,
-                            unfocusedBorderColor = Slate800,
-                            focusedTextColor = Slate200,
-                            unfocusedTextColor = Slate200
+                            disabledContainerColor = Slate900.copy(alpha = 0.6f),
+                            disabledBorderColor = Slate800,
+                            disabledTextColor = Slate400
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -159,33 +143,7 @@ fun EditSessionScreen(
 
                 Column {
                     Text(
-                        text = "Editar Meta del Día (Minutos)",
-                        color = NeonEmerald,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = metaDiariaStr,
-                        onValueChange = { metaDiariaStr = it.filter { ch -> ch.isDigit() } },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Slate900,
-                            unfocusedContainerColor = Slate900,
-                            focusedBorderColor = NeonEmerald,
-                            unfocusedBorderColor = Slate800,
-                            focusedTextColor = Slate200,
-                            unfocusedTextColor = Slate200
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                Column {
-                    Text(
-                        text = "Notas",
+                        text = "Notas de la Sesión",
                         color = Slate300,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
@@ -215,14 +173,11 @@ fun EditSessionScreen(
 
         Button(
             onClick = {
-                val mins = duracionStr.toIntOrNull() ?: 30
-                val goalMins = metaDiariaStr.toIntOrNull() ?: prefs.dailyGoalMinutes
-                focusViewModel.updateDailyGoal(goalMins)
                 if (targetSession != null) {
                     focusViewModel.updateSession(
                         sessionId = targetSession.id,
-                        asignatura = asignatura,
-                        duracionMinutos = mins,
+                        asignatura = asignaturaFija,
+                        duracionMinutos = duracionFija,
                         notas = notas,
                         onComplete = onUpdatedSuccess
                     )

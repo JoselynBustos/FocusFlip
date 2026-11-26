@@ -94,7 +94,7 @@ fun DeleteSessionScreen(
                 }
 
                 Text(
-                    text = "¿Eliminar registro? (DELETE)",
+                    text = "¿Eliminar registro?",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,

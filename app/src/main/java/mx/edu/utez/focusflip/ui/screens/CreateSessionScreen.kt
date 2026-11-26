@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -30,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +39,7 @@ import mx.edu.utez.focusflip.ui.theme.NeonEmerald
 import mx.edu.utez.focusflip.ui.theme.Slate200
 import mx.edu.utez.focusflip.ui.theme.Slate300
 import mx.edu.utez.focusflip.ui.theme.Slate400
+import mx.edu.utez.focusflip.ui.theme.Slate500
 import mx.edu.utez.focusflip.ui.theme.Slate800
 import mx.edu.utez.focusflip.ui.theme.Slate900
 import mx.edu.utez.focusflip.ui.theme.Slate950
@@ -57,14 +56,10 @@ fun CreateSessionScreen(
     val focusState by focusViewModel.uiState.collectAsStateWithLifecycle()
     val sensorData by sensorViewModel.sensorData.collectAsStateWithLifecycle()
 
-    var asignatura by remember(focusState.selectedSubject) {
-        mutableStateOf(focusState.selectedSubject)
-    }
-    var duracionStr by remember(focusState.lastMeasuredMinutes) {
-        mutableStateOf(focusState.lastMeasuredMinutes.toString())
-    }
+    val asignatura = focusState.selectedSubject
+    val duracionMedida = focusState.lastMeasuredMinutes
     var notas by remember {
-        mutableStateOf("Bocetos del prototipo integrador terminados en Classroom.")
+        mutableStateOf("")
     }
 
     Column(
@@ -92,10 +87,10 @@ fun CreateSessionScreen(
                         .padding(6.dp)
                 )
                 Text(
-                    text = "Guardar Sesión (CREATE)",
+                    text = "Guardar Sesión",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
+                    fontSize = 15.sp
                 )
                 Spacer(modifier = Modifier.width(40.dp))
             }
@@ -107,26 +102,17 @@ fun CreateSessionScreen(
                 border = BorderStroke(1.dp, NeonEmerald.copy(alpha = 0.35f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(
-                    modifier = Modifier.padding(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "¡Tiempo registrado: ${duracionStr.ifBlank { "25" }} minutos!",
-                        color = NeonEmerald,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "Sensor: Giroscopio 180° + Luz (${"%.1f".format(sensorData.lux)} lx) + Proximidad",
-                        color = Slate300,
-                        fontSize = 10.sp
-                    )
-                }
+                Text(
+                    text = "¡Tiempo registrado: $duracionMedida minutos!",
+                    color = NeonEmerald,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(14.dp)
+                )
             }
 
-            // Campos del formulario CREATE
+            // Campos del formulario (Asignatura y Duración deshabilitados porque ya fueron medidos)
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column {
                     Text(
@@ -138,16 +124,14 @@ fun CreateSessionScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
                         value = asignatura,
-                        onValueChange = { asignatura = it },
+                        onValueChange = { },
+                        enabled = false,
                         singleLine = true,
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Slate900,
-                            unfocusedContainerColor = Slate900,
-                            focusedBorderColor = NeonEmerald,
-                            unfocusedBorderColor = Slate800,
-                            focusedTextColor = Slate200,
-                            unfocusedTextColor = Slate200
+                            disabledContainerColor = Slate900.copy(alpha = 0.6f),
+                            disabledBorderColor = Slate800,
+                            disabledTextColor = Slate400
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -162,18 +146,15 @@ fun CreateSessionScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
-                        value = duracionStr,
-                        onValueChange = { duracionStr = it.filter { ch -> ch.isDigit() } },
+                        value = "$duracionMedida min",
+                        onValueChange = { },
+                        enabled = false,
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Slate900,
-                            unfocusedContainerColor = Slate900,
-                            focusedBorderColor = NeonEmerald,
-                            unfocusedBorderColor = Slate800,
-                            focusedTextColor = Slate200,
-                            unfocusedTextColor = Slate200
+                            disabledContainerColor = Slate900.copy(alpha = 0.6f),
+                            disabledBorderColor = Slate800,
+                            disabledTextColor = Slate400
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -190,6 +171,13 @@ fun CreateSessionScreen(
                     OutlinedTextField(
                         value = notas,
                         onValueChange = { notas = it },
+                        placeholder = {
+                            Text(
+                                "Escribe qué actividades o temas estudiaste en esta sesión...",
+                                color = Slate500,
+                                fontSize = 12.sp
+                            )
+                        },
                         minLines = 3,
                         maxLines = 4,
                         shape = RoundedCornerShape(14.dp),
@@ -212,13 +200,12 @@ fun CreateSessionScreen(
         GradientButton(
             text = "Guardar Sesión",
             onClick = {
-                val mins = duracionStr.toIntOrNull() ?: 25
                 focusViewModel.createSession(
                     asignatura = asignatura,
-                    duracionMinutos = mins,
-                    notas = notas,
+                    duracionMinutos = duracionMedida,
+                    notas = notas.ifBlank { "Sesión de estudio completada." },
                     currentLux = sensorData.lux,
-                    sensorModo = "Giroscopio 180° + Luz OLED (${"%.0f".format(sensorData.lux)} lx)",
+                    sensorModo = "Modo Enfoque",
                     onComplete = onSavedSuccess
                 )
             },

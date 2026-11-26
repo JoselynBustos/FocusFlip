@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -67,7 +66,6 @@ fun OledFocusScreen(
         onDispose { }
     }
 
-    // Reloj en tiempo real que avanza cada segundo
     LaunchedEffect(focusState.isTimerRunning) {
         while (focusState.isTimerRunning) {
             delay(1000L)
@@ -75,7 +73,6 @@ fun OledFocusScreen(
         }
     }
 
-    // Si estaba boca abajo por sensor físico y el usuario levanta el teléfono, dispara la Vista 06 (Alerta de Pausa)
     LaunchedEffect(sensorData.isFaceDownHardware) {
         if (sensorData.isFaceDownHardware) {
             sawHardwareFaceDown = true
@@ -94,7 +91,7 @@ fun OledFocusScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Barra superior OLED
+        // Barra superior OLED limpia
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -111,7 +108,7 @@ fun OledFocusScreen(
                         .background(NeonEmerald)
                 )
                 Text(
-                    text = "GIROSCOPIO + LUZ ACTIVOS",
+                    text = "GIROSCOPIO ACTIVO",
                     color = NeonEmerald,
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
@@ -119,7 +116,7 @@ fun OledFocusScreen(
                 )
             }
             Text(
-                text = "OLED Mode • ${"%.1f".format(sensorData.lux)} lx",
+                text = "OLED Mode",
                 color = Slate500,
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace
@@ -169,53 +166,10 @@ fun OledFocusScreen(
             }
 
             Text(
-                text = "Teléfono inclinado 180° sobre superficie",
+                text = "Teléfono boca abajo sobre superficie",
                 color = Slate400,
                 fontSize = 12.sp
             )
-
-            // Controles rápidos para demostración en vivo (Reiniciar 00:00 / Adelantar +5 min)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = { focusViewModel.resetAndStartTimer() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Slate900,
-                        contentColor = Slate400
-                    ),
-                    border = BorderStroke(1.dp, Slate800),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text("Reiniciar 00:00", fontSize = 11.sp)
-                }
-                Button(
-                    onClick = { focusViewModel.addDemoMinutes(5) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Slate900,
-                        contentColor = NeonEmerald
-                    ),
-                    border = BorderStroke(1.dp, NeonEmerald.copy(alpha = 0.35f)),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text("+5 min (Demo)", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-
-            Surface(
-                color = Slate900.copy(alpha = 0.6f),
-                shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(1.dp, Slate800)
-            ) {
-                Text(
-                    text = "Eje Z: ${"%.1f".format(sensorData.accelZ)} m/s² • Proximidad: ${if (sensorData.isProximityNear) "Cerca" else "Activa"} • Luz: ${"%.1f".format(sensorData.lux)} lx",
-                    color = Slate400,
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                )
-            }
         }
 
         // Botones de acción inferior
